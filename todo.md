@@ -1,5 +1,9 @@
 # Animation Revision
 
+- [ ] Inspect the GitHub repository relationship and current source-control status.
+- [ ] Stage the complete Triago source set while excluding generated and local-only artifacts.
+- [ ] Commit and push the current application revision to the selected GitHub repository.
+
 - [x] Inspect the existing Breaks-specific hero markup and motion rules.
 - [x] Add a subtle, palette-aligned shimmer only to the word “Breaks”.
 - [x] Verify desktop/mobile layout stability, reduced-motion behavior, and unchanged landing animations.
