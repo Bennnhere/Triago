@@ -11,11 +11,11 @@
 ## Authorized Google OAuth integration
 
 - [x] Inspect the uploaded login module and confirm that its social button is a placeholder rather than a real provider flow.
-- [ ] Enable secure server-side authentication and secret storage for Google OAuth configuration.
-- [ ] Reuse the supplied login design with a real Google Identity action, loading state, and configuration error handling.
-- [ ] Verify Google identity tokens server-side, issue an HTTP-only persistent session, and protect `/app`.
-- [ ] Add minimal session-aware landing CTAs and a logout action in the existing command center.
-- [ ] Build, test protected routing and unaffected FastAPI/WebSocket agent workflows, then checkpoint and push.
+- [x] Superseded by the user-approved built-in Manus OAuth replacement; no Google OAuth credentials or second session mechanism were introduced.
+- [x] Superseded by the user-approved built-in Manus OAuth replacement; the supplied two-panel sign-in visual direction was retained in the new Triago login surface.
+- [x] Superseded by the user-approved built-in Manus OAuth replacement; persistent HTTP-only Manus sessions now protect `/app`.
+- [x] Superseded by the user-approved built-in Manus OAuth replacement; landing CTAs and command-center logout now use the shared Manus session lifecycle.
+- [x] Superseded by the user-approved built-in Manus OAuth replacement; equivalent route, agent, build, checkpoint, and push validation is tracked below.
 
 ## Approved Manus OAuth replacement
 
