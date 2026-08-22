@@ -1,5 +1,9 @@
 # Animation Revision
 
+- [x] Review `pasted_content_3.txt` and translate its requirements into Triago changes.
+- [x] Implement the approved specification updates without regressing the existing Triago experience unless explicitly overridden.
+- [x] Validate the resulting product and checkpoint the revision.
+
 - [x] Remove the white center line at the exact moment Triago’s black panels start splitting.
 - [x] Verify the revised opening and checkpoint the animation update.
 

@@ -15,7 +15,7 @@ from typing import Any
 
 import chromadb
 import requests
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
@@ -27,6 +27,13 @@ DATA_DIR.mkdir(exist_ok=True)
 DB_PATH = DATA_DIR / "incident_agent.db"
 CHROMA_PATH = DATA_DIR / "chroma"
 WEBHOOK_URL = os.getenv("ESCALATION_WEBHOOK_URL", "").strip()
+
+ENGINEERS = [
+    {"name": "Rahul Mehta", "initials": "RM", "ownership": "Checkout Service", "status": "Available", "color": "teal", "services": ["checkout-api"]},
+    {"name": "Ananya Rao", "initials": "AR", "ownership": "Payments & Auth", "status": "Available", "color": "violet", "services": ["auth-service", "payment-service", "feature-flag-service"]},
+    {"name": "Vikram Shah", "initials": "VS", "ownership": "Infrastructure", "status": "On call", "color": "amber", "services": ["database-server", "edge-server"]},
+    {"name": "Sai Iyer", "initials": "SI", "ownership": "Database", "status": "Available", "color": "blue", "services": ["database-service"]},
+]
 
 clients: set[WebSocket] = set()
 session_alerts: deque[dict[str, Any]] = deque(maxlen=300)
@@ -85,6 +92,133 @@ def json_rows(rows: list[sqlite3.Row]) -> list[dict[str, Any]]:
     return [dict(row) for row in rows]
 
 
+def parse_trace(value: str | None) -> list[dict[str, Any]]:
+    try:
+        parsed = json.loads(value or "[]")
+        return parsed if isinstance(parsed, list) else []
+    except json.JSONDecodeError:
+        return []
+
+
+def age_label(timestamp: str) -> str:
+    try:
+        delta = max(0, int((datetime.now(timezone.utc) - datetime.fromisoformat(timestamp)).total_seconds()))
+    except ValueError:
+        return "Unknown"
+    if delta < 60:
+        return "Just now"
+    if delta < 3600:
+        return f"{delta // 60} minutes ago"
+    if delta < 86400:
+        return f"{delta // 3600} hours ago"
+    return f"{delta // 86400} days ago"
+
+
+def title_for_service(service: str) -> str:
+    titles = {
+        "checkout-api": "Checkout Service Degradation",
+        "auth-service": "Auth Token Validation Latency",
+        "payment-service": "Payment Authorization Timeout",
+        "notification-service": "Notification Delivery Degradation",
+        "feature-flag-service": "Feature Flag Evaluation Failure",
+        "database-service": "Database Service Latency",
+    }
+    return titles.get(service, service.replace("-", " ").title())
+
+
+def owner_for_service(service: str) -> dict[str, str]:
+    for engineer in ENGINEERS:
+        if service in engineer["services"]:
+            return {"owner": engineer["name"], "team": engineer["ownership"]}
+    return {"owner": "Unassigned", "team": "Unassigned"}
+
+
+def severity_from_signature(signature: str) -> str:
+    parts = [part.strip() for part in signature.split("|")]
+    if len(parts) >= 2:
+        value = parts[1].lower()
+        return {"critical": "Critical", "high": "High", "medium": "Medium", "low": "Low"}.get(value, "High")
+    return "High"
+
+
+def status_from_outcome(outcome: str, root_cause: str) -> str:
+    if "hardware" in root_cause.lower():
+        return "Hardware"
+    if outcome in {"auto-resolved", "resolved"}:
+        return "Resolved"
+    if outcome == "investigating":
+        return "Investigating"
+    return "Escalated"
+
+
+def trace_timeline(trace: list[dict[str, Any]], timestamp: str) -> list[dict[str, str]]:
+    timeline: list[dict[str, str]] = []
+    for entry in trace:
+        if entry.get("seed"):
+            continue
+        stage = entry.get("stage", "Observation")
+        title = str(entry.get("title", "Agent event"))
+        lowered = title.lower()
+        kind = "Result"
+        if stage == "Action":
+            kind = "Tool"
+        elif stage == "Decision":
+            kind = "Decision"
+        elif stage == "Thought" and "correlate" in lowered:
+            kind = "Correlation"
+        elif stage == "Thought" and "notify" in lowered:
+            kind = "Notify"
+        elif stage == "Thought" and "classify" in lowered:
+            kind = "Alert"
+        event_time = entry.get("timestamp", timestamp)
+        timeline.append({"time": event_time[11:19] if isinstance(event_time, str) and len(event_time) >= 19 else "—", "kind": kind, "title": title, "detail": str(entry.get("content", ""))})
+    if not timeline:
+        timeline.append({"time": timestamp[11:19] if len(timestamp) >= 19 else "—", "kind": "Result", "title": "Persisted incident record", "detail": "Historical incident data is available in Triago incident memory."})
+    return timeline
+
+
+def incident_view(row: sqlite3.Row, include_detail: bool = False) -> dict[str, Any]:
+    trace = parse_trace(row["reasoning_trace"])
+    owner = owner_for_service(row["service"])
+    correlation = next((entry.get("payload") for entry in trace if entry.get("title") == "PLAN / CORRELATE"), {})
+    correlated_alerts = correlation.get("correlated_alerts", []) if isinstance(correlation, dict) else []
+    incident = {
+        "id": int(row["id"]),
+        "title": title_for_service(row["service"]),
+        "service": row["service"],
+        "severity": severity_from_signature(row["signature"]),
+        "status": status_from_outcome(row["outcome"], row["root_cause"]),
+        "alerts": max(1, 1 + len(correlated_alerts)),
+        "age": age_label(row["timestamp"]),
+        "owner": owner["owner"],
+        "team": owner["team"],
+        "hardware": "hardware" in row["root_cause"].lower(),
+        "issue": row["signature"],
+        "rootCause": row["root_cause"],
+        "remediation": row["resolution_action"],
+        "verification": "Agent outcome persisted; service evidence is available below.",
+        "resolutionTime": "Recorded at " + row["timestamp"][11:19] if len(row["timestamp"]) >= 19 else "Recorded",
+        "timestamp": row["timestamp"],
+        "outcome": row["outcome"],
+        "timeline": trace_timeline(trace, row["timestamp"]),
+    }
+    if include_detail:
+        incident["evidence"] = {
+            "logs": query_logs(row["service"], limit=10),
+            "deployments": query_deploy_history(row["service"], limit=10),
+            "service_health": query_service_status(row["service"]),
+            "memory_matches": search_incident_memory(row["signature"], top_k=3),
+        }
+        incident["activity"] = [entry for entry in trace if entry.get("stage") in {"Action", "Observation"}]
+        incident["decision"] = next((entry for entry in reversed(trace) if entry.get("stage") == "Decision"), None)
+    return incident
+
+
+def incident_by_id(incident_id: int) -> sqlite3.Row | None:
+    with db() as conn:
+        return conn.execute("SELECT * FROM incidents WHERE id = ?", (incident_id,)).fetchone()
+
+
 def init_db() -> None:
     with db() as conn:
         conn.executescript(
@@ -95,6 +229,7 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS service_status(service TEXT PRIMARY KEY, status TEXT, last_checked TEXT);
             CREATE TABLE IF NOT EXISTS incidents(id INTEGER PRIMARY KEY, signature TEXT, service TEXT, root_cause TEXT, resolution_action TEXT, outcome TEXT, reasoning_trace TEXT, timestamp TEXT);
             CREATE TABLE IF NOT EXISTS incident_memory(incident_id INTEGER, embedding BLOB, signature_text TEXT, resolution_summary TEXT);
+            CREATE TABLE IF NOT EXISTS notifications(id INTEGER PRIMARY KEY, incident_id INTEGER, type TEXT, target TEXT, title TEXT, body TEXT, generated_at TEXT, delivery_status TEXT, delivery_detail TEXT, read_at TEXT);
             """
         )
 
@@ -163,6 +298,21 @@ def notify_engineer(summary: str, incident_id: str) -> dict[str, Any]:
         return {"sent": False, "status": "not_configured", "detail": "Set ESCALATION_WEBHOOK_URL to deliver Slack or Discord notification."}
     response = requests.post(WEBHOOK_URL, json={"text": f"[Alertify escalation {incident_id}]\n{summary}"}, timeout=10)
     return {"sent": response.ok, "status_code": response.status_code, "response": response.text[:500]}
+
+
+def record_notification(incident_id: int, outcome: str, target: str, title: str, body: str, delivery: dict[str, Any]) -> dict[str, Any]:
+    status = "delivered" if delivery.get("sent") else "generated"
+    if delivery.get("status") == "not_configured":
+        status = "not_configured"
+    elif delivery.get("sent") is False and delivery.get("status") != "not_configured":
+        status = "failed"
+    notification_type = "hardware" if "hardware" in body.lower() else "resolved" if outcome in {"auto-resolved", "resolved"} else "escalated"
+    with db() as conn:
+        cursor = conn.execute(
+            "INSERT INTO notifications(incident_id, type, target, title, body, generated_at, delivery_status, delivery_detail, read_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, NULL)",
+            (incident_id, notification_type, target, title, body, now_iso(), status, json.dumps(delivery)),
+        )
+    return {"id": int(cursor.lastrowid), "delivery_status": status, "sent": bool(delivery.get("sent"))}
 
 
 def log_incident(record: dict[str, Any]) -> dict[str, Any]:
@@ -244,6 +394,7 @@ async def investigate(alert: dict[str, Any]) -> dict[str, Any]:
     known_resolution = bool(matches and any(action in matches[0]["resolution_summary"] for action in ("rollback", "restart", "clear_cache")) and "escalated" not in matches[0]["resolution_summary"])
     await trace.emit("Thought", "REACT / CONFIDENCE", f"Closest vector-memory match scored {confidence:.3f}; threshold band: {band}.", {"confidence": confidence, "threshold_band": band, "closest_match": matches[0] if matches else None}, "resolved" if confidence >= .85 else "escalated" if confidence < .6 else "investigating")
 
+    notification_summary = ""
     if confidence >= 0.85 and known_resolution:
         await trace.emit("Thought", "REACT / NEXT ACTION", "The match points to a configuration regression. I will validate the deployment context, then execute the known rollback without asking a human.", {"selected_tool": "query_deploy_history"}, "investigating")
         deployments = await trace.tool("query_deploy_history", {"service": alert["service"], "limit": 10}, query_deploy_history(alert["service"]))
@@ -262,8 +413,8 @@ async def investigate(alert: dict[str, Any]) -> dict[str, Any]:
         root_cause = "probable configuration regression" if confidence >= 0.60 else "novel incident; root cause requires human judgment after completed investigation"
         resolution_action, outcome, decision = ("suggest rollback", "escalated", "ESCALATED") if confidence >= 0.60 else ("human investigation required", "escalated", "ESCALATED")
         summary = f"{alert['service']} {alert['severity']} {alert['alert_type']}. Confidence {confidence:.3f} ({band}). Root cause: {root_cause}. Suggested action: {resolution_action}."
-        await trace.emit("Thought", "REACT / ESCALATE", "The autonomous investigation is complete. I will notify an engineer with the assembled evidence, not a raw alert.", {"summary": summary}, "escalated")
-        await trace.tool("notify_engineer", {"summary": summary, "incident_id": incident_key}, notify_engineer(summary, incident_key))
+        notification_summary = summary
+        await trace.emit("Thought", "REACT / ESCALATE", "The autonomous investigation is complete. A notification will be recorded with the assembled evidence, not a raw alert.", {"summary": summary}, "escalated")
 
     record = {
         "signature": signature, "service": alert["service"], "root_cause": root_cause, "resolution_action": resolution_action, "outcome": outcome,
@@ -272,8 +423,13 @@ async def investigate(alert: dict[str, Any]) -> dict[str, Any]:
         "resolution_summary": f"{root_cause}; {resolution_action}; {outcome}",
     }
     stored = await trace.tool("log_incident", {"record": {k: v for k, v in record.items() if k not in {"reasoning_trace", "memory_text"}}}, log_incident(record))
-    await trace.emit("Decision", decision, f"{decision}: confidence {confidence:.3f}; {resolution_action}. Incident was persisted to SQLite and ChromaDB.", {"confidence": confidence, "threshold_band": band, "incident": stored, "outcome": outcome}, "resolved" if outcome == "auto-resolved" else "escalated")
-    return {"incident_key": incident_key, "confidence": confidence, "outcome": outcome, "incident": stored, "correlations": correlations}
+    if not notification_summary:
+        notification_summary = f"{alert['service']} {alert['severity']} {alert['alert_type']}. Outcome: {outcome}. Action: {resolution_action}."
+    recipient = owner_for_service(alert["service"])["owner"]
+    delivery = await trace.tool("notify_engineer", {"summary": notification_summary, "incident_id": incident_key}, notify_engineer(notification_summary, incident_key))
+    notification = await trace.tool("record_notification", {"incident_id": stored["incident_id"], "target": recipient}, record_notification(stored["incident_id"], outcome, recipient, f"Triago {outcome}: {title_for_service(alert['service'])}", notification_summary, delivery))
+    await trace.emit("Decision", decision, f"{decision}: confidence {confidence:.3f}; {resolution_action}. Incident was persisted to SQLite and ChromaDB.", {"confidence": confidence, "threshold_band": band, "incident": stored, "notification": notification, "outcome": outcome}, "resolved" if outcome == "auto-resolved" else "escalated")
+    return {"incident_key": incident_key, "confidence": confidence, "outcome": outcome, "incident": stored, "notification": notification, "correlations": correlations}
 
 
 async def ingest(alert: AlertIn) -> dict[str, Any]:
@@ -314,6 +470,12 @@ SCENARIOS = {
     "novel": AlertIn(service="feature-flag-service", alert_type="evaluation failure", severity="high", message="Rule evaluation graph cycle detected after new evaluator deploy."),
 }
 
+SCENARIO_PRESENTATION = {
+    "known": {"title": "Checkout Deployment Failure", "description": "Known deployment regression; safe rollback available.", "outcome": "Auto-resolve", "tone": "resolved"},
+    "correlated": {"title": "Auth Dependency Cluster", "description": "Correlated downstream timeouts; investigate and escalate with evidence.", "outcome": "Investigate", "tone": "investigating"},
+    "novel": {"title": "Unknown Service Failure", "description": "Novel failure; collect evidence and escalate safely.", "outcome": "Escalate", "tone": "escalated"},
+}
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -338,9 +500,111 @@ def state() -> dict[str, Any]:
     return {"alerts": alerts, "incidents": incidents, "memory_entries": get_memory_collection().count(), "webhook_configured": bool(WEBHOOK_URL)}
 
 
+@app.get("/api/incidents")
+def api_incidents(status: str | None = Query(default=None)) -> dict[str, Any]:
+    with db() as conn:
+        rows = conn.execute("SELECT * FROM incidents ORDER BY timestamp DESC").fetchall()
+    incidents = [incident_view(row) for row in rows]
+    if status and status.lower() != "all":
+        if status.lower() == "active":
+            incidents = [item for item in incidents if item["status"] != "Resolved"]
+        elif status.lower() == "resolved":
+            incidents = [item for item in incidents if item["status"] == "Resolved"]
+        else:
+            incidents = [item for item in incidents if item["status"].lower() == status.lower()]
+    return {"incidents": incidents}
+
+
+@app.get("/api/incidents/{incident_id}")
+def api_incident_detail(incident_id: int) -> dict[str, Any]:
+    row = incident_by_id(incident_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    return {"incident": incident_view(row, include_detail=True)}
+
+
+@app.post("/api/incidents/{incident_id}/notify")
+async def api_incident_notify(incident_id: int) -> dict[str, Any]:
+    row = incident_by_id(incident_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    view = incident_view(row)
+    recipient = view["owner"]
+    summary = f"{view['title']}. Outcome: {view['outcome']}. Root cause: {view['rootCause']}. Action: {view['remediation']}. Verification: {view['verification']}."
+    delivery = notify_engineer(summary, f"INC-{incident_id}")
+    notification = record_notification(incident_id, view["outcome"], recipient, f"Triago update: {view['title']}", summary, delivery)
+    await broadcast({"event": "notification", "incident_id": incident_id, "notification": notification, "timestamp": now_iso()})
+    return {"notification": notification}
+
+
+@app.get("/api/memory")
+def api_memory(query: str = Query(default="")) -> dict[str, Any]:
+    if query.strip():
+        matches = search_incident_memory(query.strip(), top_k=20)
+        records: list[dict[str, Any]] = []
+        for match in matches:
+            row = incident_by_id(match["incident_id"])
+            if not row:
+                continue
+            view = incident_view(row)
+            records.append({"id": view["id"], "title": view["title"], "service": view["service"], "severity": view["severity"], "rootCause": view["rootCause"], "resolution": row["resolution_action"], "age": view["age"], "similarity": round(match["similarity"] * 100)})
+        return {"records": records}
+    with db() as conn:
+        rows = conn.execute("SELECT * FROM incidents ORDER BY timestamp DESC LIMIT 30").fetchall()
+    return {"records": [{"id": view["id"], "title": view["title"], "service": view["service"], "severity": view["severity"], "rootCause": view["rootCause"], "resolution": row["resolution_action"], "age": view["age"], "similarity": None} for row in rows for view in [incident_view(row)] ]}
+
+
+@app.get("/api/engineers")
+def api_engineers() -> dict[str, Any]:
+    return {"engineers": ENGINEERS}
+
+
+@app.get("/api/notifications")
+def api_notifications() -> dict[str, Any]:
+    with db() as conn:
+        rows = conn.execute("SELECT * FROM notifications WHERE read_at IS NULL ORDER BY generated_at DESC").fetchall()
+    return {"notifications": [{"id": int(row["id"]), "incidentId": row["incident_id"], "type": row["type"], "target": row["target"], "title": row["title"], "body": row["body"], "time": age_label(row["generated_at"]), "deliveryStatus": row["delivery_status"], "deliveryDetail": json.loads(row["delivery_detail"] or "{}") } for row in rows]}
+
+
+@app.post("/api/notifications/mark-read")
+def api_notifications_mark_read() -> dict[str, Any]:
+    with db() as conn:
+        cursor = conn.execute("UPDATE notifications SET read_at = ? WHERE read_at IS NULL", (now_iso(),))
+    return {"updated": cursor.rowcount}
+
+
+@app.get("/api/analytics")
+def api_analytics() -> dict[str, Any]:
+    with db() as conn:
+        rows = conn.execute("SELECT * FROM incidents ORDER BY timestamp ASC").fetchall()
+        notification_rows = conn.execute("SELECT delivery_status FROM notifications").fetchall()
+    views = [incident_view(row) for row in rows]
+    severity = {name: sum(1 for item in views if item["severity"] == name) for name in ("Critical", "High", "Medium", "Low")}
+    root_causes: dict[str, int] = {}
+    for item in views:
+        root_causes[item["rootCause"]] = root_causes.get(item["rootCause"], 0) + 1
+    return {
+        "totalIncidents": len(views),
+        "activeIncidents": sum(1 for item in views if item["status"] != "Resolved"),
+        "resolvedIncidents": sum(1 for item in views if item["status"] == "Resolved"),
+        "escalatedIncidents": sum(1 for item in views if item["status"] in {"Escalated", "Hardware"}),
+        "autoResolved": sum(1 for item in views if item["outcome"] == "auto-resolved"),
+        "notificationCount": len(notification_rows),
+        "deliveredNotifications": sum(1 for row in notification_rows if row["delivery_status"] == "delivered"),
+        "severityDistribution": severity,
+        "rootCauses": [{"label": label, "count": count} for label, count in sorted(root_causes.items(), key=lambda item: item[1], reverse=True)[:4]],
+        "incidentsOverTime": [{"label": item["timestamp"][11:16] if len(item["timestamp"]) >= 16 else "—", "count": 1} for item in views[-12:]],
+    }
+
+
 @app.get("/scenarios")
 def scenarios() -> dict[str, Any]:
     return {key: value.model_dump() for key, value in SCENARIOS.items()}
+
+
+@app.get("/api/scenarios")
+def api_scenarios() -> dict[str, Any]:
+    return {"scenarios": [{"id": key, **SCENARIO_PRESENTATION[key], "alert": value.model_dump()} for key, value in SCENARIOS.items()]}
 
 
 @app.post("/alerts")
