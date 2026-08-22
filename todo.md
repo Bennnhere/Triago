@@ -1,5 +1,9 @@
 # Animation Revision
 
+- [x] Inspect the existing Breaks-specific hero markup and motion rules.
+- [x] Add a subtle, palette-aligned shimmer only to the word “Breaks”.
+- [x] Verify desktop/mobile layout stability, reduced-motion behavior, and unchanged landing animations.
+
 - [x] Review `pasted_content_3.txt` and translate its requirements into Triago changes.
 - [x] Implement the approved specification updates without regressing the existing Triago experience unless explicitly overridden.
 - [x] Validate the resulting product and checkpoint the revision.
