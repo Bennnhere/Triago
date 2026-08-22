@@ -1,5 +1,9 @@
 # Animation Revision
 
+- [x] Remove the hero’s “Autonomous Incident Response” eyebrow component.
+- [x] Style only “Breaks” in the hero headline with Copperplate in white.
+- [x] Verify the refined landing hero and checkpoint the update.
+
 - [x] Define semantic Triago tokens from the specified navy, cream, stone, and brown palette.
 - [x] Apply the color system across landing, navigation, dashboard, incident, chart, notification, and simulator surfaces.
 - [x] Verify contrast, desktop/mobile rendering, and checkpoint the palette revision.
