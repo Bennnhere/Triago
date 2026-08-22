@@ -1,5 +1,8 @@
 # Animation Revision
 
+- [x] Remove the white center line at the exact moment Triago’s black panels start splitting.
+- [x] Verify the revised opening and checkpoint the animation update.
+
 - [x] Align the white center-line removal with the instant the black entrance panels clear the viewport.
 - [x] Verify the synchronized entrance sequence and checkpoint the change.
 
