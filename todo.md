@@ -1,8 +1,33 @@
 # Animation Revision
 
-- [ ] Inspect the GitHub repository relationship and current source-control status.
-- [ ] Stage the complete Triago source set while excluding generated and local-only artifacts.
-- [ ] Commit and push the current application revision to the selected GitHub repository.
+- [x] Review `pasted_content_4.txt` and map its requirements to the current Triago application.
+- [x] Implement the user-approved Manus OAuth replacement while preserving unaffected Triago workflows.
+- [ ] Validate the revised experience and checkpoint the changes.
+
+> Blocked: the uploaded module contains only mock localStorage credentials and placeholder social-login actions; it does not include a reusable Google OAuth, session, callback, token, or logout implementation. Obtain the actual authentication module or approval for an alternative before integrating.
+
+> Resolution: the user approved the built-in Manus OAuth alternative. The new Triago login page intentionally retains the supplied module’s two-panel sign-in visual premise while adapting it to the existing secure Manus callback and session system.
+
+## Authorized Google OAuth integration
+
+- [x] Inspect the uploaded login module and confirm that its social button is a placeholder rather than a real provider flow.
+- [ ] Enable secure server-side authentication and secret storage for Google OAuth configuration.
+- [ ] Reuse the supplied login design with a real Google Identity action, loading state, and configuration error handling.
+- [ ] Verify Google identity tokens server-side, issue an HTTP-only persistent session, and protect `/app`.
+- [ ] Add minimal session-aware landing CTAs and a logout action in the existing command center.
+- [ ] Build, test protected routing and unaffected FastAPI/WebSocket agent workflows, then checkpoint and push.
+
+## Approved Manus OAuth replacement
+
+- [x] Obtain explicit approval to use the project’s built-in Manus OAuth instead of direct Google OAuth.
+- [x] Remove direct-Google-only implementation and dependencies that are no longer needed.
+- [x] Connect the supplied login surface to the built-in Manus OAuth start and callback flow.
+- [x] Preserve authenticated redirects, persistent sessions, protected `/app`, and logout controls.
+- [ ] Validate the Manus OAuth lifecycle, responsive login surface, live FastAPI/WebSocket workflows, build, checkpoint, and GitHub push.
+
+- [x] Inspect the GitHub repository relationship and current source-control status.
+- [x] Stage the complete Triago source set while excluding generated and local-only artifacts.
+- [x] Commit and push the current application revision to the selected GitHub repository.
 
 - [x] Inspect the existing Breaks-specific hero markup and motion rules.
 - [x] Add a subtle, palette-aligned shimmer only to the word “Breaks”.

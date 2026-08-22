@@ -1,0 +1,10 @@
+{
+  "name": "hackathon-2026",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hackathon 2026 incident response application",
+  "scripts": {
+    "start": "npm --prefix backend start",
+    "dev": "npm --prefix backend run dev"
+  }
+}
