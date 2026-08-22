@@ -1,4 +1,4 @@
-# Alertify Design Direction
+# Triago Design Direction
 
 ## Three possible approaches
 
@@ -26,7 +26,7 @@
 
 **Typography System.** Space Grotesk is used in all labels, headings, counters, and status chrome with firm tracking and compact uppercase. IBM Plex Mono renders all event data and reasoning trace lines. No third typeface or system-font fallback is permitted.
 
-**Brand Essence.** Alertify is the autonomous reliability filter for lean engineering teams that need complete investigations rather than more notifications. Personality: exacting, composed, accountable.
+**Brand Essence.** Triago is the autonomous reliability filter for lean engineering teams that need complete investigations rather than more notifications. Personality: exacting, composed, accountable.
 
 **Brand Voice.** Headlines state an operational fact. CTAs trigger a real system event. Example lines: “Noise enters. Evidence exits.” and “Run known checkout failure.”
 
@@ -39,3 +39,5 @@
 - The center divider is the brightest and most structurally dominant element; every other surface, type treatment, border, and icon is cool off-white or muted slate.
 - The left panel deliberately carries tighter, denser telemetry strips and a more visible topology field, while the right panel uses greater trace spacing and a calmer surface.
 - The “many inputs, one resolved pulse” geometry recurs in the center gate, fallback mark, dense incoming rails, and the semantic left border of each lower scenario control.
+- The user-mandated Triago name supersedes the original exploratory naming. The landing hero and command-center overview now make the intake → gate → composed output transformation an explicit primary composition.
+- Pure white is retained only in the temporary entrance aperture and the static gate motifs; content hierarchy otherwise uses cool off-white, slate, and semantic teal, amber, coral, and violet.

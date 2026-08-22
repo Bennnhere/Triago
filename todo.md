@@ -1,5 +1,9 @@
 # Animation Revision
 
+- [x] Review `pasted_content_2.txt` and translate its requirements into Triago changes.
+- [x] Implement the approved requirements without regressing the cinematic entrance sequence.
+- [x] Verify the resulting experience and checkpoint the update.
+
 - [x] Hold the Triago entrance overlay completely black through 0.7 seconds.
 - [x] Run the horizontal black-panel split and center-line reveal from 0.7 to 1.8 seconds.
 - [x] Hold the cleared split and white line through the 2.5–3.0 second settle window, then remove all entrance elements.

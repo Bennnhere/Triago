@@ -1,11 +1,8 @@
-/* Signal Gate Design: keep the shell direct, dark, and evidence-first—never a chat or marketing surface. */
-import ErrorBoundary from "./components/ErrorBoundary";
-import Home from "./pages/Home";
+/* Triago application routes: a public product narrative and an interactive command center share one visual system. */
+import { Route, Switch } from "wouter";
+import Landing from "./pages/Landing";
+import CommandCenter from "./pages/CommandCenter";
 
 export default function App() {
-  return (
-    <ErrorBoundary>
-      <Home />
-    </ErrorBoundary>
-  );
+  return <Switch><Route path="/app" component={CommandCenter} /><Route path="/" component={Landing} /><Route component={Landing} /></Switch>;
 }
