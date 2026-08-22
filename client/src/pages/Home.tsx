@@ -1,4 +1,4 @@
-/* Signal Gate Design: bilateral command console; incoming noise on the left, calm inspectable agent evidence on the right. */
+/* Triago Design: a calm, top-and-bottom incident console revealed through a cinematic engineered entrance overlay. */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Activity, ArrowUpRight, CircleDot, Database, Radio, RotateCcw, ShieldCheck, Zap } from "lucide-react";
 
@@ -148,15 +148,19 @@ export default function Home() {
 
   return (
     <main className="signal-gate-console">
-      <div className="center-gate" aria-hidden="true" />
+      <div className="triago-entrance" aria-hidden="true">
+        <div className="entrance-panel entrance-panel-top" />
+        <div className="entrance-panel entrance-panel-bottom" />
+        <div className="entrance-line" />
+      </div>
       <header className="console-header">
         <div className="brand-lockup">
           <span className="brand-mark">
-            <img src="/manus-storage/alertify-mark_57c55314.png" alt="Alertify" onError={(event) => { event.currentTarget.style.display = "none"; event.currentTarget.nextElementSibling?.classList.add("is-visible"); }} />
+            <img src="/manus-storage/alertify-mark_57c55314.png" alt="Triago" onError={(event) => { event.currentTarget.style.display = "none"; event.currentTarget.nextElementSibling?.classList.add("is-visible"); }} />
             <span className="mark-fallback" aria-hidden="true"><i /><i /><i /></span>
           </span>
           <div>
-            <span className="product-name">ALERTIFY</span>
+            <span className="product-name">TRIAGO</span>
             <span className="product-subtitle">AUTONOMOUS INCIDENT TRIAGE</span>
           </div>
         </div>
