@@ -1,5 +1,9 @@
 # Animation Revision
 
+- [x] Define semantic Triago tokens from the specified navy, cream, stone, and brown palette.
+- [x] Apply the color system across landing, navigation, dashboard, incident, chart, notification, and simulator surfaces.
+- [x] Verify contrast, desktop/mobile rendering, and checkpoint the palette revision.
+
 - [x] Review `pasted_content_2.txt` and translate its requirements into Triago changes.
 - [x] Implement the approved requirements without regressing the cinematic entrance sequence.
 - [x] Verify the resulting experience and checkpoint the update.

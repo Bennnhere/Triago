@@ -41,3 +41,4 @@
 - The “many inputs, one resolved pulse” geometry recurs in the center gate, fallback mark, dense incoming rails, and the semantic left border of each lower scenario control.
 - The user-mandated Triago name supersedes the original exploratory naming. The landing hero and command-center overview now make the intake → gate → composed output transformation an explicit primary composition.
 - Pure white is retained only in the temporary entrance aperture and the static gate motifs; content hierarchy otherwise uses cool off-white, slate, and semantic teal, amber, coral, and violet.
+- Triago’s color system is now Deep Navy `#0A2947` as the dominant foundation, Warm Cream `#F3E4C9` for readable contrast and key light surfaces, Soft Stone `#D4D3C0` for structure and supporting contrast, and Earthy Brown `#8B5E3C` for selected operational emphasis. Status tints are deliberately muted derivatives of this system.
