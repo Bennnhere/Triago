@@ -1,5 +1,12 @@
 # Animation Revision
 
+- [x] Align the white center-line removal with the instant the black entrance panels clear the viewport.
+- [x] Verify the synchronized entrance sequence and checkpoint the change.
+
+- [x] Inspect Triago’s current components, routing, data model, and interaction flows.
+- [x] Write a complete explanation of the website workflow and each component’s purpose.
+- [x] Deliver the structured reference document.
+
 - [x] Remove the hero’s “Autonomous Incident Response” eyebrow component.
 - [x] Style only “Breaks” in the hero headline with Copperplate in white.
 - [x] Verify the refined landing hero and checkpoint the update.
