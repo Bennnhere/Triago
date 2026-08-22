@@ -1,5 +1,10 @@
 # Animation Revision
 
+- [x] Hold the Triago entrance overlay completely black through 0.7 seconds.
+- [x] Run the horizontal black-panel split and center-line reveal from 0.7 to 1.8 seconds.
+- [x] Hold the cleared split and white line through the 2.5–3.0 second settle window, then remove all entrance elements.
+- [x] Verify the retimed sequence and checkpoint the revision.
+
 - [x] Rename all visible product identity to Triago.
 - [x] Render the landing page behind a full-viewport black entrance overlay.
 - [x] Split the overlay vertically into upper and lower black panels around a temporary white center line.
