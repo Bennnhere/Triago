@@ -53,6 +53,15 @@
 - [x] Trigger a three-second command-center transition from Open Command Center and direct landing CTAs, with the white line disappearing at split start.
 - [x] Exercise the mobile command-center entry transition, confirm command-center arrival, then checkpoint the revision; user confirmed the full mobile flow works well.
 
+## Cinematic UI transformation
+
+- [x] Audit the current landing, command-center, live FastAPI data surfaces, realtime activity, and motion system before visual changes.
+- [x] Transform the landing into an editorial navy-and-cream narrative with a restrained animated agent visualization and a substantial closing footer.
+- [x] Redesign the command-center overview, agent activity, investigation graph, memory, notification, and incident-outcome surfaces around live backend data.
+- [x] Add purposeful motion, responsive visual refinements, and reduced-motion support without disrupting routes or agent workflows.
+- [x] Validate simulator, alert ingestion, correlation, investigation, memory, notifications, WebSocket traces, build, and desktop/mobile layouts.
+- [ ] Save the final cinematic transformation checkpoint and push the source update to GitHub.
+
 ## Reported authenticated simulator issue
 
 - [x] Identify why the authenticated Simulator shows backend attention with no live scenarios while keeping fallback incidents disabled: the FastAPI agent was down and port-3000 previews incorrectly resolved to browser-local localhost.
