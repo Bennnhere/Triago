@@ -79,10 +79,12 @@
 - [x] Implement managed Node incident contracts and route public API/status traffic to the deployed application.
 - [x] Replace the separate-agent WebSocket reconnect dependency with production-safe live agent activity, then validate scenarios, status, and simulator behavior.
 - [x] Validate the managed agent locally with REST smoke tests, 19 automated tests, TypeScript, production build, and the retained FastAPI scenario validator.
-- [ ] Publish the managed Node agent revision and verify the public command center no longer targets browser-local FastAPI.
-- [ ] Run a public simulator scenario and confirm agent status, activity, incident, and notification updates.
+- [x] Publish the managed Node agent revision and verify the public command center no longer targets browser-local FastAPI.
+- [x] Run a public simulator scenario and confirm agent status, activity, incident, and notification updates.
 - [ ] Save the final verified production-agent checkpoint and push the source revision to GitHub.
-- [ ] Stabilize published managed-agent status between activity polls and prevent duplicate simulator trace entries.
+- [x] Stabilize published managed-agent status between activity polls and prevent duplicate simulator trace entries.
+- [x] Replace all remaining user-visible FastAPI-only loading, empty, status, and error labels with accurate managed-agent wording.
+- [ ] Redeploy the final wording update and confirm the public command center and simulator show no FastAPI-only labels.
 
 - [x] Inspect the GitHub repository relationship and current source-control status.
 - [x] Stage the complete Triago source set while excluding generated and local-only artifacts.
