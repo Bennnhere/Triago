@@ -82,6 +82,7 @@
 - [ ] Publish the managed Node agent revision and verify the public command center no longer targets browser-local FastAPI.
 - [ ] Run a public simulator scenario and confirm agent status, activity, incident, and notification updates.
 - [ ] Save the final verified production-agent checkpoint and push the source revision to GitHub.
+- [ ] Stabilize published managed-agent status between activity polls and prevent duplicate simulator trace entries.
 
 - [x] Inspect the GitHub repository relationship and current source-control status.
 - [x] Stage the complete Triago source set while excluding generated and local-only artifacts.

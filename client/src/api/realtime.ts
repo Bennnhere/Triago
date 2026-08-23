@@ -40,14 +40,16 @@ export function connectTrace({ onEvent, onStatus }: TraceHandlers): () => void {
 
   let stopped = false;
   let pollTimer: number | undefined;
+  let hasConnected = false;
   const seen = new Set<string>();
 
   const poll = async () => {
     if (stopped) return;
-    onStatus("connecting");
+    if (!hasConnected) onStatus("connecting");
     try {
       const payload = await request<{ status: string; events: AgentEvent[] }>("/api/agent/activity");
-      onStatus(payload.status === "connected" ? "connected" : "disconnected");
+      hasConnected = payload.status === "connected";
+      onStatus(hasConnected ? "connected" : "disconnected");
       for (const event of payload.events) {
         dedupeEvent(event, seen, onEvent);
       }
