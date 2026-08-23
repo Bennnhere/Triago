@@ -2,7 +2,7 @@
 
 - [x] Review `pasted_content_4.txt` and map its requirements to the current Triago application.
 - [x] Implement the user-approved Manus OAuth replacement while preserving unaffected Triago workflows.
-- [ ] Validate the revised experience and checkpoint the changes.
+- [x] Complete end-to-end authenticated-session validation.
 
 > Blocked: the uploaded module contains only mock localStorage credentials and placeholder social-login actions; it does not include a reusable Google OAuth, session, callback, token, or logout implementation. Obtain the actual authentication module or approval for an alternative before integrating.
 
@@ -23,7 +23,22 @@
 - [x] Remove direct-Google-only implementation and dependencies that are no longer needed.
 - [x] Connect the supplied login surface to the built-in Manus OAuth start and callback flow.
 - [x] Preserve authenticated redirects, persistent sessions, protected `/app`, and logout controls.
-- [ ] Validate the Manus OAuth lifecycle, responsive login surface, live FastAPI/WebSocket workflows, build, checkpoint, and GitHub push.
+- [x] Complete real-session Manus OAuth login, refresh persistence, logout, and protected live-agent/WebSocket validation.
+
+## Reported OAuth callback failure
+
+- [x] Inspect the production-equivalent OAuth callback failure from the connected browser and identify the concrete server-side cause: the managed database was missing the users table.
+- [x] Apply the smallest secure repair, add regression coverage, and verify that valid sign-in no longer falls back to the Triago callback error screen.
+- [x] Re-run the complete authenticated session, logout, protected route, simulator/WebSocket, build, and GitHub validation cycle.
+
+## Final delivery
+
+- [ ] Save the repaired OAuth and simulator checkpoint and push the final source revision to GitHub.
+
+## Reported authenticated simulator issue
+
+- [x] Identify why the authenticated Simulator shows backend attention with no live scenarios while keeping fallback incidents disabled: the FastAPI agent was down and port-3000 previews incorrectly resolved to browser-local localhost.
+- [x] Repair live scenario retrieval and verify selectable scenarios plus streamed trace updates in the protected command center.
 
 - [x] Inspect the GitHub repository relationship and current source-control status.
 - [x] Stage the complete Triago source set while excluding generated and local-only artifacts.

@@ -7,10 +7,14 @@ export class ApiError extends Error {
 
 const configuredBase = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, "");
 
+export function resolvePreviewApiBase(protocol: string, hostname: string): string {
+  const previewHost = hostname.match(/^\d+-(.+)$/);
+  if (previewHost) return `${protocol}//8000-${previewHost[1]}`;
+  return "http://127.0.0.1:8000";
+}
+
 function developmentApiBase(): string {
-  if (typeof window !== "undefined" && window.location.hostname.startsWith("5173-")) {
-    return `${window.location.protocol}//8000-${window.location.host.slice("5173-".length)}`;
-  }
+  if (typeof window !== "undefined") return resolvePreviewApiBase(window.location.protocol, window.location.hostname);
   return "http://127.0.0.1:8000";
 }
 
