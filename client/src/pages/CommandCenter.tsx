@@ -9,10 +9,12 @@ import { getEngineers } from "../api/engineers";
 import { getNotifications, markNotificationsRead } from "../api/notifications";
 import { getAnalytics } from "../api/analytics";
 import { getSimulatorScenarios, submitAlert } from "../api/simulator";
+import { apiBaseUrl } from "../api/client";
 import type { AgentEvent, AgentTraceEvent, Analytics, Engineer, Incident, IncidentStatus, MemoryRecord, Notification, Severity, SimulatorScenario, TimelineEvent, ToolEvent } from "../api/types";
 
 type Page = "overview" | "incidents" | "detail" | "memory" | "engineers" | "notifications" | "analytics" | "simulator" | "settings";
 type ConnectionState = "connecting" | "connected" | "disconnected";
+const usesManagedSimulatorTrace = typeof window !== "undefined" && new URL(apiBaseUrl).origin === window.location.origin;
 
 const navItems: { id: Page; label: string; icon: typeof Home }[] = [
   { id: "overview", label: "Overview", icon: Home }, { id: "incidents", label: "Incidents", icon: CircleAlert }, { id: "memory", label: "Memory", icon: BrainCircuit }, { id: "engineers", label: "Engineers", icon: Users }, { id: "notifications", label: "Notifications", icon: Bell }, { id: "analytics", label: "Analytics", icon: Gauge }, { id: "simulator", label: "Simulator", icon: Play }, { id: "settings", label: "Settings", icon: Settings },
@@ -83,7 +85,7 @@ export default function CommandCenter() {
     finally { if (showLoading) setLoading(false); }
   }, []);
 
-  useEffect(() => { void loadOperationalData(true); const disconnect = connectTrace({ onStatus: setAgentState, onEvent: (event: AgentEvent) => { if (event.event === "trace" && simulationRunningRef.current) setSimulationEvents((current) => [...current, traceToTimeline(event)]); if (event.event === "alert") notify(`Agent received an alert for ${event.alert.service}.`); if (event.event === "trace" && event.stage === "Decision") void loadOperationalData(false); } }); return disconnect; }, [loadOperationalData, notify]);
+  useEffect(() => { void loadOperationalData(true); const disconnect = connectTrace({ onStatus: setAgentState, onEvent: (event: AgentEvent) => { if (event.event === "trace" && simulationRunningRef.current && !usesManagedSimulatorTrace) setSimulationEvents((current) => [...current, traceToTimeline(event)]); if (event.event === "alert") notify(`Agent received an alert for ${event.alert.service}.`); if (event.event === "trace" && event.stage === "Decision") void loadOperationalData(false); } }); return disconnect; }, [loadOperationalData, notify]);
   useEffect(() => { const timer = window.setTimeout(() => { void searchMemory(memoryQuery).then(setMemory).catch((error) => setDataError(error instanceof Error ? error.message : "Incident memory request failed.")); }, 180); return () => window.clearTimeout(timer); }, [memoryQuery]);
 
   const activeIncidents = incidents.filter((incident) => incident.status !== "Resolved");
