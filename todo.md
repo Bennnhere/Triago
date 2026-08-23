@@ -35,6 +35,18 @@
 
 - [x] Save the repaired OAuth and simulator checkpoint and push the final source revision to GitHub.
 
+## Reported published OAuth failure
+
+- [x] Superseded by the user-approved removal of authentication from the current application release.
+- [x] Superseded by the user-approved removal of authentication from the current application release.
+- [x] Superseded by the user-approved removal of authentication from the current application release.
+
+## Approved authentication removal
+
+- [x] Remove current login routes, protected-route gates, visible sign-in controls, and session-dependent command-center controls.
+- [x] Run a simulator scenario from the now-public command center and confirm selectable scenarios plus live trace streaming remain available.
+- [ ] Save and validate the authentication-free revision across direct public desktop and mobile access, then checkpoint it.
+
 ## Reported authenticated simulator issue
 
 - [x] Identify why the authenticated Simulator shows backend attention with no live scenarios while keeping fallback incidents disabled: the FastAPI agent was down and port-3000 previews incorrectly resolved to browser-local localhost.
