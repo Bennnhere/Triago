@@ -45,7 +45,7 @@
 
 - [x] Remove current login routes, protected-route gates, visible sign-in controls, and session-dependent command-center controls.
 - [x] Run a simulator scenario from the now-public command center and confirm selectable scenarios plus live trace streaming remain available.
-- [ ] Save and validate the authentication-free revision across direct public desktop and mobile access, then checkpoint it.
+- [x] Save and validate the authentication-free revision across direct public desktop and mobile access, then checkpoint it.
 
 ## Reported authenticated simulator issue
 
