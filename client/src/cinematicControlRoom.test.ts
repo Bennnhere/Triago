@@ -28,4 +28,9 @@ describe("cinematic control room", () => {
     expect(cinematicStyles).toContain(".control-room-band { grid-template-columns:1fr 52px 1fr;");
     expect(cinematicStyles).toContain(".control-room-grid,.control-room-evidence { gap:12px;");
   });
+
+  it("keeps a single Settings destination in the command-center sidebar", () => {
+    expect(controlRoom.match(/label: "Settings"/g)).toHaveLength(1);
+    expect(controlRoom).not.toContain('<button onClick={() => changePage("settings")}><Settings');
+  });
 });

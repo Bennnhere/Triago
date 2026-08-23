@@ -62,6 +62,11 @@
 - [x] Validate simulator, alert ingestion, correlation, investigation, memory, notifications, WebSocket traces, build, and desktop/mobile layouts.
 - [x] Save the final cinematic transformation checkpoint and push the source update to GitHub.
 
+## Sidebar navigation correction
+
+- [x] Remove the duplicate visible Settings control while keeping a single Settings navigation destination.
+- [x] Validate the public command-center sidebar and checkpoint the focused correction.
+
 ## Reported authenticated simulator issue
 
 - [x] Identify why the authenticated Simulator shows backend attention with no live scenarios while keeping fallback incidents disabled: the FastAPI agent was down and port-3000 previews incorrectly resolved to browser-local localhost.
