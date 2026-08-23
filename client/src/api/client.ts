@@ -1,4 +1,4 @@
-/* Triago API client: one environment-configured transport boundary for every FastAPI request. */
+/* Triago API client: published deployments use the managed same-origin agent; local previews may still point at FastAPI. */
 
 export class ApiError extends Error {
   status?: number;
@@ -10,7 +10,8 @@ const configuredBase = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, 
 export function resolvePreviewApiBase(protocol: string, hostname: string): string {
   const previewHost = hostname.match(/^\d+-(.+)$/);
   if (previewHost) return `${protocol}//8000-${previewHost[1]}`;
-  return "http://127.0.0.1:8000";
+  if (hostname === "localhost" || hostname === "127.0.0.1") return "http://127.0.0.1:8000";
+  return `${protocol}//${hostname}`;
 }
 
 function developmentApiBase(): string {

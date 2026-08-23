@@ -72,6 +72,17 @@
 - [x] Identify why the authenticated Simulator shows backend attention with no live scenarios while keeping fallback incidents disabled: the FastAPI agent was down and port-3000 previews incorrectly resolved to browser-local localhost.
 - [x] Repair live scenario retrieval and verify selectable scenarios plus streamed trace updates in the protected command center.
 
+## Reported agent connectivity issue
+
+- [x] Diagnose why the published command center shows backend attention and the realtime agent remains reconnecting: it falls back to browser-local FastAPI because the separate sandbox agent is not deployed with the web app.
+- [x] Select the no-extra-cost managed Node agent architecture for the published command center, preserving FastAPI only as a local development validator.
+- [x] Implement managed Node incident contracts and route public API/status traffic to the deployed application.
+- [x] Replace the separate-agent WebSocket reconnect dependency with production-safe live agent activity, then validate scenarios, status, and simulator behavior.
+- [x] Validate the managed agent locally with REST smoke tests, 19 automated tests, TypeScript, production build, and the retained FastAPI scenario validator.
+- [ ] Publish the managed Node agent revision and verify the public command center no longer targets browser-local FastAPI.
+- [ ] Run a public simulator scenario and confirm agent status, activity, incident, and notification updates.
+- [ ] Save the final verified production-agent checkpoint and push the source revision to GitHub.
+
 - [x] Inspect the GitHub repository relationship and current source-control status.
 - [x] Stage the complete Triago source set while excluding generated and local-only artifacts.
 - [x] Commit and push the current application revision to the selected GitHub repository.
