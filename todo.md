@@ -47,6 +47,12 @@
 - [x] Run a simulator scenario from the now-public command center and confirm selectable scenarios plus live trace streaming remain available.
 - [x] Save and validate the authentication-free revision across direct public desktop and mobile access, then checkpoint it.
 
+## Command-center cinematic transition
+
+- [x] Reuse Triago’s black top-and-bottom split visual language when entering the public command center.
+- [x] Trigger a three-second command-center transition from Open Command Center and direct landing CTAs, with the white line disappearing at split start.
+- [ ] Exercise the mobile command-center entry transition, confirm command-center arrival, then checkpoint the revision.
+
 ## Reported authenticated simulator issue
 
 - [x] Identify why the authenticated Simulator shows backend attention with no live scenarios while keeping fallback incidents disabled: the FastAPI agent was down and port-3000 previews incorrectly resolved to browser-local localhost.
