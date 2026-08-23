@@ -60,7 +60,7 @@
 - [x] Redesign the command-center overview, agent activity, investigation graph, memory, notification, and incident-outcome surfaces around live backend data.
 - [x] Add purposeful motion, responsive visual refinements, and reduced-motion support without disrupting routes or agent workflows.
 - [x] Validate simulator, alert ingestion, correlation, investigation, memory, notifications, WebSocket traces, build, and desktop/mobile layouts.
-- [ ] Save the final cinematic transformation checkpoint and push the source update to GitHub.
+- [x] Save the final cinematic transformation checkpoint and push the source update to GitHub.
 
 ## Reported authenticated simulator issue
 
