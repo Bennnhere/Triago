@@ -51,7 +51,7 @@
 
 - [x] Reuse Triago’s black top-and-bottom split visual language when entering the public command center.
 - [x] Trigger a three-second command-center transition from Open Command Center and direct landing CTAs, with the white line disappearing at split start.
-- [ ] Exercise the mobile command-center entry transition, confirm command-center arrival, then checkpoint the revision.
+- [x] Exercise the mobile command-center entry transition, confirm command-center arrival, then checkpoint the revision; user confirmed the full mobile flow works well.
 
 ## Reported authenticated simulator issue
 
