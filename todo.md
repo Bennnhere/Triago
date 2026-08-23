@@ -33,7 +33,7 @@
 
 ## Final delivery
 
-- [ ] Save the repaired OAuth and simulator checkpoint and push the final source revision to GitHub.
+- [x] Save the repaired OAuth and simulator checkpoint and push the final source revision to GitHub.
 
 ## Reported authenticated simulator issue
 
